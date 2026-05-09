@@ -1,0 +1,84 @@
+# ─── Build directories ────────────────────────────────────────────────────────
+build/
+Build/
+build-*/
+build_examples/
+cmake-build-debug/
+cmake-build-debug-visual-studio/
+
+# ─── CMake generated files ────────────────────────────────────────────────────
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+Makefile
+install
+
+# ─── Compiled object files ────────────────────────────────────────────────────
+*.d
+*.slo
+*.lo
+*.o
+*.obj
+*.dwo
+
+# ─── Precompiled headers ──────────────────────────────────────────────────────
+*.gch
+*.pch
+
+# ─── Libraries ────────────────────────────────────────────────────────────────
+*.so
+*.so.*
+*.dylib
+*.dll
+*.lai
+*.la
+*.a
+*.lib
+
+# ─── Executables ──────────────────────────────────────────────────────────────
+*.exe
+*.out
+*.app
+
+# ─── Debugger / linker artifacts ──────────────────────────────────────────────
+*.ilk
+*.pdb
+
+# ─── vcpkg ────────────────────────────────────────────────────────────────────
+vcpkg_installed/
+
+# ─── Drogon generated/runtime files ──────────────────────────────────────────
+html/
+latex/
+trace.json
+
+# ─── IDE: Visual Studio ───────────────────────────────────────────────────────
+.vs/
+*.user
+CMakeSettings.json
+
+# ─── IDE: VS Code ─────────────────────────────────────────────────────────────
+.vscode/
+
+# ─── IDE: CLion / JetBrains ───────────────────────────────────────────────────
+.idea/
+cmake-build-*/
+
+# ─── IDE: Eclipse / KDevelop ──────────────────────────────────────────────────
+*.kdev4
+.cproject
+.project
+.settings/
+
+# ─── IDE: Kiro ────────────────────────────────────────────────────────────────
+.kiro/
+
+# ─── Temp / logs ──────────────────────────────────────────────────────────────
+*.tmp
+*.log
+*.bak
+*.swp
+.cache/
+Testing/
