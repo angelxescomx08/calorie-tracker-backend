@@ -1,0 +1,342 @@
+// ============================================================
+// Calorie Tracker Backend — Database Schema
+// Compatible con: dbdiagram.io
+// Base de datos: PostgreSQL 17
+// ============================================================
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+Enum auth_provider_type {
+  google
+  email
+}
+
+Enum gender_type {
+  male
+  female
+}
+
+Enum activity_level_type {
+  sedentary         // Sin ejercicio, trabajo de escritorio       × 1.200
+  lightly_active    // Ejercicio ligero 1–3 días/semana           × 1.375
+  moderately_active // Ejercicio moderado 3–5 días/semana         × 1.550
+  very_active       // Ejercicio intenso 6–7 días/semana          × 1.725
+  extra_active      // Trabajo físico + ejercicio muy intenso     × 1.900
+}
+
+Enum goal_type {
+  lose_weight
+  gain_weight
+  maintain
+}
+
+Enum meal_type {
+  breakfast
+  lunch
+  dinner
+  snack
+}
+
+Enum exercise_category {
+  cardio
+  strength
+  flexibility
+  sports
+  other
+}
+
+// ─────────────────────────────────────────────
+// GRUPO: AUTENTICACIÓN
+// ─────────────────────────────────────────────
+
+TableGroup auth {
+  users
+  auth_providers
+}
+
+Table users {
+  id              bigserial     [pk]
+  email           varchar(255)  [unique, not null]
+  name            varchar(255)  [not null]
+  profile_picture varchar(500)
+  email_verified  boolean       [not null, default: false]
+  created_at      timestamptz   [not null, default: `now()`]
+  updated_at      timestamptz   [not null, default: `now()`]
+
+  Note: 'Tabla central de usuarios. Soporta login con Google y email/contraseña via auth_providers.'
+}
+
+Table auth_providers {
+  id                       bigserial    [pk]
+  user_id                  bigint       [not null, ref: > users.id]
+  provider                 auth_provider_type [not null]
+
+  // --- Email/contraseña ---
+  password_hash            varchar(255) [note: 'Hash bcrypt. NULL si provider = google']
+  email_verification_token varchar(100) [note: 'Token de verificación de correo']
+  token_expires_at         timestamptz
+
+  // --- Google OAuth ---
+  google_sub               varchar(255) [note: 'ID único de Google (campo "sub" del JWT)']
+  google_access_token      text
+  google_refresh_token     text
+  google_token_expires_at  timestamptz
+
+  created_at               timestamptz  [not null, default: `now()`]
+  updated_at               timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (user_id, provider) [unique, name: 'uq_auth_user_provider']
+    google_sub          [name: 'idx_auth_google_sub']
+  }
+
+  Note: 'Un usuario puede tener hasta 2 filas: una para email y otra para google.'
+}
+
+// ─────────────────────────────────────────────
+// GRUPO: PERFIL Y OBJETIVOS
+// ─────────────────────────────────────────────
+
+TableGroup profile {
+  user_profiles
+  user_goals
+}
+
+Table user_profiles {
+  id             bigserial          [pk]
+  user_id        bigint             [unique, not null, ref: - users.id]
+  birth_date     date               [not null]
+  gender         gender_type        [not null]
+  height_cm      decimal(5,2)       [not null, note: 'Estatura en centímetros. Ej: 175.50']
+  activity_level activity_level_type [not null]
+  created_at     timestamptz        [not null, default: `now()`]
+  updated_at     timestamptz        [not null, default: `now()`]
+
+  Note: '''
+  Datos físicos del usuario necesarios para calcular:
+  - BMR (Mifflin-St Jeor): Hombre = 10×peso + 6.25×altura - 5×edad + 5
+                           Mujer  = 10×peso + 6.25×altura - 5×edad - 161
+  - TDEE = BMR × factor_actividad
+  La edad se calcula desde birth_date en tiempo de ejecución.
+  '''
+}
+
+Table user_goals {
+  id                   bigserial   [pk]
+  user_id              bigint      [not null, ref: > users.id]
+  goal_type            goal_type   [not null]
+  target_weight_kg     decimal(5,2) [not null, note: 'Peso objetivo en kg']
+  weekly_rate_kg       decimal(3,2) [not null, default: 0.5, note: 'Ritmo deseado en kg/semana (0.25 – 1.0)']
+  daily_calorie_target int         [not null, note: 'Calculado: TDEE ± (weekly_rate_kg × 1100)']
+  start_date           date        [not null]
+  end_date             date        [note: 'NULL = sin fecha límite']
+  is_active            boolean     [not null, default: true]
+  created_at           timestamptz [not null, default: `now()`]
+  updated_at           timestamptz [not null, default: `now()`]
+
+  indexes {
+    (user_id, is_active) [name: 'idx_goals_user_active']
+  }
+
+  Note: '''
+  Fórmula de calorías diarias objetivo:
+  - Perder peso: daily_calorie_target = TDEE - (weekly_rate_kg × 1100)
+  - Ganar peso:  daily_calorie_target = TDEE + (weekly_rate_kg × 1100)
+  - Mantener:    daily_calorie_target = TDEE
+  1 kg de grasa ≈ 7700 kcal → 0.5 kg/semana ≈ 550 kcal/día de déficit/superávit.
+  '''
+}
+
+// ─────────────────────────────────────────────
+// GRUPO: SEGUIMIENTO CORPORAL
+// ─────────────────────────────────────────────
+
+TableGroup body_tracking {
+  weight_logs
+  body_measurements
+}
+
+Table weight_logs {
+  id          bigserial    [pk]
+  user_id     bigint       [not null, ref: > users.id]
+  weight_kg   decimal(5,2) [not null, note: 'Peso en kg. Ej: 78.30']
+  logged_date date         [not null]
+  notes       varchar(255)
+  created_at  timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (user_id, logged_date) [name: 'idx_weight_user_date']
+  }
+
+  Note: 'Registro diario de peso. Se usa también para calcular calorías quemadas en ejercicio (MET × peso × horas).'
+}
+
+Table body_measurements {
+  id                   bigserial    [pk]
+  user_id              bigint       [not null, ref: > users.id]
+  measured_date        date         [not null]
+
+  // Medidas en cm — Método US Navy
+  neck_cm              decimal(5,2) [not null, note: 'Circunferencia del cuello en cm']
+  waist_cm             decimal(5,2) [not null, note: 'Circunferencia de la cintura en cm (a nivel del ombligo)']
+  hip_cm               decimal(5,2) [note: 'Solo mujeres: circunferencia de la cadera en cm']
+
+  // Resultado calculado
+  body_fat_percentage  decimal(5,2) [note: 'Porcentaje de grasa corporal. Calculado al insertar.']
+
+  notes                varchar(255)
+  created_at           timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (user_id, measured_date) [name: 'idx_measurements_user_date']
+  }
+
+  Note: '''
+  Fórmula US Navy (medidas en cm):
+    Hombre: %GC = 86.010 × log10(cintura - cuello) - 70.041 × log10(altura) + 36.76
+    Mujer:  %GC = 163.205 × log10(cintura + cadera - cuello) - 97.684 × log10(altura) - 78.387
+  La altura se obtiene de user_profiles.height_cm.
+  '''
+}
+
+// ─────────────────────────────────────────────
+// GRUPO: NUTRICIÓN
+// ─────────────────────────────────────────────
+
+TableGroup nutrition {
+  foods
+  daily_logs
+  meal_entries
+}
+
+Table foods {
+  id                  bigserial    [pk]
+  name                varchar(255) [not null]
+  brand               varchar(255)
+  barcode             varchar(50)  [note: 'EAN-13 / UPC para escaneo']
+
+  // Valores nutricionales por 100 g
+  serving_size_g      decimal(7,2) [not null, default: 100, note: 'Tamaño de porción de referencia en gramos']
+  calories            decimal(7,2) [not null, note: 'kcal por porción de referencia']
+  protein_g           decimal(7,2) [not null, default: 0]
+  carbs_g             decimal(7,2) [not null, default: 0]
+  fat_g               decimal(7,2) [not null, default: 0]
+  fiber_g             decimal(7,2) [default: 0]
+  sugar_g             decimal(7,2) [default: 0]
+  sodium_mg           decimal(7,2) [default: 0]
+
+  created_by_user_id  bigint       [ref: > users.id, note: 'NULL = alimento del sistema/global']
+  is_verified         boolean      [not null, default: false, note: 'true = validado por el equipo']
+  created_at          timestamptz  [not null, default: `now()`]
+  updated_at          timestamptz  [not null, default: `now()`]
+
+  indexes {
+    name    [name: 'idx_foods_name']
+    barcode [name: 'idx_foods_barcode']
+  }
+
+  Note: 'Base de datos de alimentos. Puede ser global (created_by_user_id = NULL) o creada por el usuario.'
+}
+
+Table daily_logs {
+  id         bigserial    [pk]
+  user_id    bigint       [not null, ref: > users.id]
+  log_date   date         [not null]
+  water_ml   int          [not null, default: 0, note: 'Agua consumida en mililitros']
+  notes      varchar(500)
+  created_at timestamptz  [not null, default: `now()`]
+  updated_at timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (user_id, log_date) [unique, name: 'uq_daily_log_user_date']
+  }
+
+  Note: 'Registro padre por día y usuario. Agrupa todas las comidas del día.'
+}
+
+Table meal_entries {
+  id           bigserial    [pk]
+  daily_log_id bigint       [not null, ref: > daily_logs.id]
+  meal_type    meal_type    [not null]
+  food_id      bigint       [not null, ref: > foods.id]
+
+  // Cantidad consumida
+  quantity_g   decimal(7,2) [not null, note: 'Gramos consumidos de este alimento']
+
+  // Macros calculados al momento del registro (snapshot)
+  calories     decimal(7,2) [not null]
+  protein_g    decimal(7,2) [not null]
+  carbs_g      decimal(7,2) [not null]
+  fat_g        decimal(7,2) [not null]
+
+  created_at   timestamptz  [not null, default: `now()`]
+
+  Note: '''
+  Los macros se calculan como:
+    valor = (foods.valor / foods.serving_size_g) × quantity_g
+  Se almacenan como snapshot para que cambios futuros en foods no alteren el historial.
+  '''
+}
+
+// ─────────────────────────────────────────────
+// GRUPO: EJERCICIO
+// ─────────────────────────────────────────────
+
+TableGroup exercise {
+  exercises
+  exercise_logs
+}
+
+Table exercises {
+  id                  bigserial         [pk]
+  name                varchar(255)      [not null]
+  category            exercise_category [not null]
+
+  // MET = Equivalente Metabólico de la Tarea
+  met_value           decimal(5,2)      [not null, note: 'Kcal quemadas = MET × peso_kg × horas']
+
+  description         text
+  created_by_user_id  bigint            [ref: > users.id, note: 'NULL = ejercicio global del sistema']
+  is_verified         boolean           [not null, default: false]
+  created_at          timestamptz       [not null, default: `now()`]
+
+  Note: '''
+  Valores MET de referencia (Compendium of Physical Activities):
+    Caminar 5 km/h        → 3.5   Ciclismo moderado    → 5.8
+    Correr 8 km/h         → 8.0   Natación moderada    → 5.8
+    Correr 12 km/h        → 11.0  Fútbol               → 7.0
+    Pesas moderado        → 3.5   HIIT                 → 8.0
+    Yoga                  → 2.5   Pilates              → 3.0
+  '''
+}
+
+Table exercise_logs {
+  id               bigserial    [pk]
+  user_id          bigint       [not null, ref: > users.id]
+  exercise_id      bigint       [not null, ref: > exercises.id]
+  log_date         date         [not null]
+
+  duration_minutes int          [not null, note: 'Duración del ejercicio en minutos']
+  calories_burned  decimal(7,2) [not null, note: 'Snapshot: MET × peso_kg × (duration_minutes/60)']
+
+  // Campos opcionales según tipo de ejercicio
+  sets             smallint     [note: 'Para entrenamiento de fuerza']
+  reps             smallint     [note: 'Para entrenamiento de fuerza']
+  distance_km      decimal(7,3) [note: 'Para ejercicios de cardio']
+  avg_heart_rate   smallint     [note: 'Frecuencia cardíaca promedio (bpm)']
+
+  notes            varchar(255)
+  created_at       timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (user_id, log_date) [name: 'idx_exercise_log_user_date']
+  }
+
+  Note: '''
+  Fórmula calorías quemadas:
+    calories_burned = exercises.met_value × weight_logs.weight_kg × (duration_minutes / 60.0)
+  El peso del usuario se toma del weight_log más reciente hasta log_date.
+  '''
+}
