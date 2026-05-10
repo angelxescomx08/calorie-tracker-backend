@@ -205,3 +205,18 @@ CREATE TABLE exercise_logs (
 );
 
 CREATE INDEX idx_exercise_log_user_date ON exercise_logs(user_id, log_date);
+
+-- ─────────────────────────────────────────────
+-- GRUPO: SESIONES (Bearer tokens, 14 días)
+-- ─────────────────────────────────────────────
+
+CREATE TABLE sessions (
+  id         BIGSERIAL     PRIMARY KEY,
+  user_id    BIGINT        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token      CHAR(64)      NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ   NOT NULL,
+  created_at TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_sessions_token   ON sessions(token);
+CREATE INDEX idx_sessions_user_id ON sessions(user_id);
