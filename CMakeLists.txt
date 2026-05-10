@@ -9,9 +9,22 @@ find_package(Drogon CONFIG REQUIRED)
 
 # Drogon and Trantor hardcode MSVC-only warning flags; strip them for GCC/Clang
 if(NOT MSVC)
-    set_property(TARGET Drogon::Drogon  PROPERTY INTERFACE_COMPILE_OPTIONS "")
+    set_property(TARGET Drogon::Drogon   PROPERTY INTERFACE_COMPILE_OPTIONS "")
     set_property(TARGET Trantor::Trantor PROPERTY INTERFACE_COMPILE_OPTIONS "")
 endif()
 
-add_executable(${PROJECT_NAME} main.cpp)
+set(SOURCES
+    main.cpp
+    src/application/use_cases/SeedExercisesUseCase.cpp
+    src/infrastructure/loaders/JsonCompendiumLoader.cpp
+    src/infrastructure/persistence/PostgresExerciseRepository.cpp
+    src/presentation/controllers/AdminController.cpp
+)
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
