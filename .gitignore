@@ -87,3 +87,6 @@ cmake-build-*/
 Testing/
 out.txt
 err.txt
+
+# ─── Environment / secrets ────────────────────────────────────────────────────
+.env

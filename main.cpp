@@ -1,6 +1,7 @@
 #include <drogon/drogon.h>
 
 // ── Infrastructure ────────────────────────────────────────────────────────────
+#include "infrastructure/config/EnvLoader.hpp"
 #include "infrastructure/loaders/JsonCompendiumLoader.hpp"
 #include "infrastructure/auth/PasswordHasher.hpp"
 #include "infrastructure/auth/TokenGenerator.hpp"
@@ -80,14 +81,18 @@ using namespace presentation;
 
 int main()
 {
+    // ── Config ────────────────────────────────────────────────────────────────
+    auto env = infrastructure::EnvLoader::load(".env");
+    using E  = infrastructure::EnvLoader;
+
     // ── Database config ───────────────────────────────────────────────────────
     drogon::orm::PostgresConfig pgConfig;
-    pgConfig.host             = "127.0.0.1";
-    pgConfig.port             = 5432;
-    pgConfig.databaseName     = "calorie_tracker";
-    pgConfig.username         = "admin";
-    pgConfig.password         = "secret";
-    pgConfig.connectionNumber = 10;
+    pgConfig.host             = E::get(env, "DB_HOST", "127.0.0.1");
+    pgConfig.port             = E::getInt(env, "DB_PORT", 5432);
+    pgConfig.databaseName     = E::get(env, "DB_NAME", "calorie_tracker");
+    pgConfig.username         = E::get(env, "DB_USER", "admin");
+    pgConfig.password         = E::get(env, "DB_PASSWORD", "");
+    pgConfig.connectionNumber = E::getInt(env, "DB_CONNECTIONS", 10);
     pgConfig.name             = "default";
     pgConfig.isFast           = false;
     pgConfig.timeout          = -1.0;
@@ -101,7 +106,7 @@ int main()
 
     // ── App builder ───────────────────────────────────────────────────────────
     drogon::app()
-        .addListener("0.0.0.0", 8080)
+        .addListener(E::get(env, "APP_HOST", "0.0.0.0"), E::getInt(env, "APP_PORT", 8080))
         .setLogLevel(trantor::Logger::kInfo)
         .addDbClient(pgConfig)
 
