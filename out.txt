@@ -118,3 +118,103 @@
  - PgBatchConnection.cc:191
 20260510 16:42:43.350000 UTC 11228 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
  - PgBatchConnection.cc:191
+20260510 16:43:04.550000 UTC 11228 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:04.551000 UTC 29572 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:04.551000 UTC 28620 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:04.552000 UTC 12884 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:04.552000 UTC 23568 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:18.432000 UTC 29572 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:18.432000 UTC 23568 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:18.432000 UTC 11228 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:18.432000 UTC 28620 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:18.432000 UTC 12884 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:19.438000 UTC 11228 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191
+20260510 16:43:19.438000 UTC 29572 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191
+20260510 16:43:19.438000 UTC 12884 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191
+20260510 16:43:19.438000 UTC 23568 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191
+20260510 16:43:19.439000 UTC 28620 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191
+20260510 16:43:40.632000 UTC 23568 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:40.632000 UTC 12884 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:40.633000 UTC 28620 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:40.633000 UTC 11228 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:40.633000 UTC 29572 ERROR Failed to consume pg input:server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:421
+20260510 16:43:54.819000 UTC 28620 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:54.819000 UTC 11228 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:54.819000 UTC 12884 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:54.819000 UTC 23568 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:54.819000 UTC 29572 ERROR !!!Pg connection failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+ - PgBatchConnection.cc:191
+20260510 16:43:55.831000 UTC 12884 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191
+20260510 16:43:55.831000 UTC 11228 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191
+20260510 16:43:55.832000 UTC 23568 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191
+20260510 16:43:55.844000 UTC 28620 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191
+20260510 16:43:55.844000 UTC 29572 ERROR !!!Pg connection failed: FATAL:  the database system is starting up
+ - PgBatchConnection.cc:191

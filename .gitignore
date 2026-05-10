@@ -85,3 +85,5 @@ cmake-build-*/
 *.swp
 .cache/
 Testing/
+out.txt
+err.txt
