@@ -85,6 +85,33 @@ int main()
     auto env = infrastructure::EnvLoader::load(".env");
     using E  = infrastructure::EnvLoader;
 
+    // ── CORS ──────────────────────────────────────────────────────────────────
+    std::string corsOrigin = E::get(env, "CORS_ORIGIN", "*");
+
+    drogon::app().registerPreRoutingAdvice(
+        [corsOrigin](const drogon::HttpRequestPtr& req,
+                     drogon::AdviceCallback&& acb,
+                     drogon::AdviceChainCallback&& accb) {
+            if (req->method() == drogon::Options) {
+                auto resp = drogon::HttpResponse::newHttpResponse();
+                resp->setStatusCode(drogon::k204NoContent);
+                resp->addHeader("Access-Control-Allow-Origin",  corsOrigin);
+                resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                resp->addHeader("Access-Control-Max-Age",       "86400");
+                acb(resp);
+            } else {
+                accb();
+            }
+        });
+
+    drogon::app().registerPostHandlingAdvice(
+        [corsOrigin](const drogon::HttpRequestPtr&, const drogon::HttpResponsePtr& resp) {
+            resp->addHeader("Access-Control-Allow-Origin",  corsOrigin);
+            resp->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        });
+
     // ── Database config ───────────────────────────────────────────────────────
     drogon::orm::PostgresConfig pgConfig;
     pgConfig.host             = E::get(env, "DB_HOST", "127.0.0.1");
